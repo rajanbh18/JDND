@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <title>Chat Room</title>
     <meta charset="utf-8" name="viewport" content="width=device-width">
@@ -36,7 +36,7 @@
                         <input class="mdui-textfield-input" id="msg"/>
                     </div>
                     <div class="mdui-container" style="padding:20px 35px">
-                        <!-- TODO: add a send button to send message -->
+                        <button class="mdui-btn mdui-color-theme mdui-ripple" onclick="sendMsgToServer()">Send</button>
                         <button class="mdui-btn mdui-color-theme mdui-ripple"
                                 onclick="clearMsg()">Clear
                         </button>
@@ -55,9 +55,11 @@
                     <span class="mdui-chip-icon mdui-color-blue">
                         <i class="mdui-icon material-icons">face</i></span>
                     <span class="mdui-chip-title">Online Users</span>
-                    <!-- TODO: check online number num -->
+                    <label class="chat-num"></label>
                 </div>
-                <!-- TODO: add a message container -->
+
+                <div class="message-container">
+                </div>
             </div>
 
         </div>
@@ -76,7 +78,8 @@
         /**
          * WebSocket client PS：URL shows WebSocket protocal, port number, and then end point.
          */
-        var webSocket = new WebSocket(/*[[${webSocketUrl}]]*/ 'ws://localhost:8080/chat');
+         var username =/*[[${username}]]*/;
+        var webSocket = new WebSocket('ws://localhost:8080/chat?'+username);
         /**
          * websocket open connection.
          */
@@ -92,13 +95,28 @@
             //Receive Message from Server
             var message = JSON.parse(event.data) || {};
             var $messageContainer = $('.message-container');
-            if (message.type === 'SPEAK') {
+            if (message.messageType === 'JOIN') {
                 $messageContainer.append(
                     '<div class="mdui-card" style="margin: 10px 0;">' +
                     '<div class="mdui-card-primary">' +
-                    '<div class="mdui-card-content message-content">' + message.username + "：" + message.msg + '</div>' +
+                    '<div class="mdui-card-content message-content">' + message.userName + " " + message.chatMessage + '</div>' +
                     '</div></div>');
             }
+            else if (message.messageType === 'CHAT') {
+                $messageContainer.append(
+                    '<div class="mdui-card" style="margin: 10px 0;">' +
+                    '<div class="mdui-card-primary">' +
+                    '<div class="mdui-card-content message-content">' + message.userName + "：" + message.chatMessage + '</div>' +
+                    '</div></div>');
+            }
+            else if (message.messageType === 'LEAVE') {
+                $messageContainer.append(
+                    '<div class="mdui-card" style="margin: 10px 0;">' +
+                    '<div class="mdui-card-primary">' +
+                    '<div class="mdui-card-content message-content">' + message.userName + " " + message.chatMessage + '</div>' +
+                    '</div></div>');
+            }
+
             $('.chat-num').text(message.onlineCount);
             var $cards = $messageContainer.children('.mdui-card:visible').toArray();
             if ($cards.length > 5) {
@@ -133,7 +151,7 @@
     function sendMsgToServer() {
         var $message = $('#msg');
         if ($message.val()) {
-            webSocket.send(JSON.stringify({username: $('#username').text(), msg: $message.val()}));
+            webSocket.send(JSON.stringify({userName: $('#username').text(), chatMessage: $message.val(),messageType: 'CHAT', onlineCount: '2'}));
             $message.val(null);
         }
     }
