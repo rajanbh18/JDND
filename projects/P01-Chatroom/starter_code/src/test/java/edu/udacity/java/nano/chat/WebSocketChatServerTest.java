@@ -9,11 +9,14 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.concurrent.TimeUnit;
 
 @RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+
 public class WebSocketChatServerTest {
 
 
@@ -32,6 +35,18 @@ public class WebSocketChatServerTest {
         driver.quit();
     }
 
+    @Test
+    public void testLoginViewPage(){
+        driver.get("http://localhost:8080/");
+        Assert.assertEquals("Chat Room Login", driver.getTitle());
+    }
+
+    @Test
+    public void testChatViewMapping(){
+        driver.get("http://localhost:8080/index?username="+"rajan");
+        Assert.assertEquals("Chat Room", driver.getTitle());
+    }
+
     /**
      * user enter the chat room
      */
@@ -46,7 +61,7 @@ public class WebSocketChatServerTest {
      * user sends message
      */
     @Test
-    public void testSendMessage(){
+    public void testUserSendMessage(){
         driver.get("http://localhost:8080/index?username="+"rajan");
         WebElement element1 = driver.findElement(By.className("mdui-textfield-input"));
         element1.sendKeys("hello all");
@@ -60,7 +75,7 @@ public class WebSocketChatServerTest {
      *  user leave the chat room
      */
     @Test
-    public void testLeave(){
+    public void testUserLeftChatRoom(){
         driver.get("http://localhost:8080/index?username="+"rajan");
         WebElement element = driver.findElement(By.id("sendButton"));
         element.click();
