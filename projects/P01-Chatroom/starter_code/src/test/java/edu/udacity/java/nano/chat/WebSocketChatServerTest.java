@@ -67,8 +67,8 @@ public class WebSocketChatServerTest {
         element1.sendKeys("hello all");
         WebElement element = driver.findElement(By.id("sendButton"));
         element.click();
-        WebElement message = driver.findElement(By.className("mdui-card-content"));
-        Assert.assertEquals("rajan joined the chat room.", message.getText());
+        String msg = driver.findElement(By.className("message-container")).getText();
+        Assert.assertTrue(msg.contains("hello all"));
     }
 
     /**
